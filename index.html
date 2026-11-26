@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plan Tracker – Individual Psychology Skill Learning Tracker</title>
+  <meta name="description" content="A calm, structured 12-week psychology learning tracker for beginners building foundational knowledge, research literacy, communication skills, and ethical awareness." />
+
+  <!-- Google Fonts: Lora (editorial serif) + Plus Jakarta Sans (clean UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+
+  <!-- Supabase JS v2 (UMD bundle for static GitHub Pages & local compatibility) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- App Data & Core Modules -->
+  <script defer src="js/config.js"></script>
+  <script defer src="js/data/curriculum.js"></script>
+  <script defer src="js/data/library.js"></script>
+  <script defer src="js/core/progress.js"></script>
+  <script defer src="js/core/auth.js"></script>
+  <script defer src="js/core/storage.js"></script>
+  <script defer src="js/ui/renderers.js"></script>
+  <script defer src="js/ui/app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Mobile Drawer Backdrop -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+    <!-- Desktop Sidebar / Mobile Drawer -->
+    <aside id="sidebar" class="sidebar" aria-label="Primary Navigation">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/>
+            <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/>
+            <path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Plan Tracker</h1>
+          <span>Psychology SkillTrack</span>
+        </div>
+      </div>
+
+      <div class="nav-section-label">Learning Workspace</div>
+      <ul class="nav-list" role="menubar">
+        <li>
+          <button type="button" class="nav-btn is-active" data-nav="dashboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+            <span>Dashboard</span>
+            <span id="nav-overall-pill" class="nav-pill">0%</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="nav-btn" data-nav="curriculum">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"/><path d="M3 6h18"/><path d="M3 18h18"/></svg>
+            <span>12-Week Plan</span>
+            <span id="nav-weeks-pill" class="nav-pill">0/12</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="nav-btn" data-nav="module">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            <span>Weekly Module</span>
+            <span id="nav-current-week-pill" class="nav-pill">W1</span>
+          </button>
+        </li>
+      </ul>
+
+      <div class="nav-section-label" style="margin-top: 0.75rem;">Practice &amp; Resources</div>
+      <ul class="nav-list" role="menubar">
+        <li>
+          <button type="button" class="nav-btn" data-nav="journal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            <span>Reflection Journal</span>
+            <span id="nav-journal-pill" class="nav-pill">0</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="nav-btn" data-nav="library">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+            <span>Reading Library</span>
+            <span class="nav-pill">10</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="nav-btn" data-nav="evidence">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <span>Evidence Vault</span>
+            <span id="nav-evidence-pill" class="nav-pill">0</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="nav-btn" data-nav="settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>Account &amp; Backup</span>
+          </button>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <div class="sync-card">
+          <div class="sync-status-row">
+            <span id="sidebar-sync-dot" class="status-dot is-local"></span>
+            <span id="sidebar-sync-label">Local Fallback Mode</span>
+          </div>
+          <div id="sidebar-user-email" style="color: var(--text-muted); font-size: 0.74rem; margin-top: 0.25rem; word-break: break-all;">
+            Sign in for cloud sync across devices
+          </div>
+        </div>
+        <button type="button" id="sidebar-auth-btn" class="btn btn-primary btn-sm" style="width: 100%;">
+          Sign In / Sync Account
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Shell -->
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Open menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div class="topbar-meta">
+            <span class="topbar-breadcrumb">12-Week Beginner Psychology Programme</span>
+            <span id="topbar-title" class="topbar-title">Learning Dashboard</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="last-updated-chip" title="Last updated date and time">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Updated: <strong id="topbar-last-updated">—</strong></span>
+          </div>
+          <button type="button" id="topbar-auth-btn" class="btn btn-secondary btn-sm">
+            Account
+          </button>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <!-- 1. DASHBOARD VIEW -->
+        <section id="view-dashboard" class="view-panel is-active" aria-labelledby="topbar-title"></section>
+
+        <!-- 2. 12-WEEK CURRICULUM OVERVIEW VIEW -->
+        <section id="view-curriculum" class="view-panel" aria-label="12-Week Psychology Curriculum"></section>
+
+        <!-- 3. WEEKLY MODULE DETAIL VIEW -->
+        <section id="view-module" class="view-panel" aria-label="Weekly Module Details"></section>
+
+        <!-- 4. REFLECTION JOURNAL VIEW -->
+        <section id="view-journal" class="view-panel" aria-label="Personal Reflection Journal"></section>
+
+        <!-- 5. READING LIBRARY VIEW -->
+        <section id="view-library" class="view-panel" aria-label="Psychology Reading Library"></section>
+
+        <!-- 6. EVIDENCE VAULT VIEW -->
+        <section id="view-evidence" class="view-panel" aria-label="Evidence and Assignments"></section>
+
+        <!-- 7. ACCOUNT, BACKUP & SETTINGS VIEW -->
+        <section id="view-settings" class="view-panel" aria-label="Account and Settings"></section>
+      </main>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile Quick Navigation">
+      <button type="button" class="mobile-nav-item is-active" data-nav="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        <span>Home</span>
+      </button>
+      <button type="button" class="mobile-nav-item" data-nav="curriculum">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18"/><path d="M3 6h18"/><path d="M3 18h18"/></svg>
+        <span>Plan</span>
+      </button>
+      <button type="button" class="mobile-nav-item" data-nav="module">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span>Module</span>
+      </button>
+      <button type="button" class="mobile-nav-item" data-nav="journal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        <span>Journal</span>
+      </button>
+      <button type="button" class="mobile-nav-item" data-nav="library">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+        <span>Library</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Authentication Modal -->
+  <div id="auth-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h2 id="auth-modal-title" class="serif-title" style="margin: 0; font-size: 1.35rem;">Cloud Sync &amp; Account</h2>
+          <p style="margin: 0.15rem 0 0; font-size: 0.84rem;">Save your 12-week psychology progress across devices with Supabase.</p>
+        </div>
+        <button type="button" id="close-auth-modal" class="icon-close" aria-label="Close modal">✕</button>
+      </div>
+
+      <div id="auth-unconfigured-notice" class="callout callout-warm" style="display: none;">
+        <div>
+          <strong>Supabase is not connected yet.</strong><br />
+          Your progress is safely saved in this browser for now. To enable cloud login &amp; multi-device sync, connect your Supabase Project URL and Anon Key under <strong>Account &amp; Backup</strong>.
+        </div>
+      </div>
+
+      <div id="auth-tabs" class="tab-row">
+        <button type="button" class="tab-btn is-active" data-auth-tab="signin">Sign In</button>
+        <button type="button" class="tab-btn" data-auth-tab="signup">Create Account</button>
+        <button type="button" class="tab-btn" data-auth-tab="reset">Reset Password</button>
+      </div>
+
+      <form id="auth-form">
+        <div id="auth-name-group" class="field-group" style="display: none;">
+          <label class="field-label" for="auth-display-name">Your Name</label>
+          <input id="auth-display-name" class="input" type="text" placeholder="e.g., Maya Patel" autocomplete="name" />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="auth-email">Email Address</label>
+          <input id="auth-email" class="input" type="email" required placeholder="you@example.com" autocomplete="email" />
+        </div>
+
+        <div id="auth-password-group" class="field-group">
+          <label class="field-label" for="auth-password">Password</label>
+          <input id="auth-password" class="input" type="password" minlength="6" placeholder="At least 6 characters" autocomplete="current-password" />
+        </div>
+
+        <div id="auth-feedback" style="font-size: 0.84rem; margin-bottom: 0.85rem;"></div>
+
+        <div style="display: flex; gap: 0.6rem; justify-content: flex-end; flex-wrap: wrap;">
+          <button type="button" id="auth-open-settings-btn" class="btn btn-secondary">Cloud Setup</button>
+          <button type="submit" id="auth-submit-btn" class="btn btn-primary">Sign In</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toast-region" class="toast-region" aria-live="polite"></div>
+</body>
+</html>

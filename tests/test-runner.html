@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkillTrack Automated Verification Suite</title>
+  <link rel="stylesheet" href="../css/tokens.css" />
+  <style>
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-cream);
+      color: var(--text-primary);
+      max-width: 880px;
+      margin: 2rem auto;
+      padding: 0 1.25rem;
+    }
+    .summary {
+      background: var(--surface-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .test-row {
+      background: var(--surface-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+    .pass { color: #2f6f4e; font-weight: 700; }
+    .fail { color: #b85c52; font-weight: 700; }
+  </style>
+  <script src="../js/config.js"></script>
+  <script src="../js/data/curriculum.js"></script>
+  <script src="../js/data/library.js"></script>
+  <script src="../js/core/progress.js"></script>
+</head>
+<body>
+  <div class="summary">
+    <h1 style="margin: 0 0 0.4rem;">Plan Tracker – Psychology SkillTrack: Unit &amp; Integrity Tests</h1>
+    <p id="test-summary" style="margin: 0; color: var(--text-secondary);">Running tests...</p>
+  </div>
+  <div id="test-results"></div>
+
+  <script>
+    (function () {
+      const { MODULES } = window.SkillTrack.Curriculum;
+      const { BOOKS } = window.SkillTrack.Library;
+      const P = window.SkillTrack.Progress;
+
+      const results = [];
+      function assert(name, condition, detail) {
+        results.push({ name, passed: Boolean(condition), detail: detail || '' });
+      }
+
+      // 1. Curriculum integrity (12 weeks + all required sections)
+      assert('Curriculum has exactly 12 weekly modules', MODULES.length === 12, `Found ${MODULES.length}`);
+      const allModulesComplete = MODULES.every((m) =>
+        m.week >= 1 &&
+        m.week <= 12 &&
+        m.estimatedHours === '4–6 hours' &&
+        Array.isArray(m.objectives) && m.objectives.length >= 3 &&
+        Array.isArray(m.topics) && m.topics.length >= 5 &&
+        Array.isArray(m.activities) && m.activities.length >= 4 &&
+        Array.isArray(m.recommendedReading) && m.recommendedReading.length >= 2 &&
+        Array.isArray(m.practicalExercises) && m.practicalExercises.length >= 2 &&
+        Array.isArray(m.tasks) && m.tasks.length === 5 &&
+        Array.isArray(m.deliverables) && m.deliverables.length >= 2 &&
+        Array.isArray(m.reflectionQuestions) && m.reflectionQuestions.length >= 3
+      );
+      assert('Every weekly module includes all 10 required sections & 4–6h commitment', allModulesComplete);
+
+      // 2. Reading Library integrity
+      const requiredTitles = [
+        'Psychology 2e',
+        'Make It Stick',
+        'Development Through the Lifespan',
+        'Neuroscience: Exploring the Brain',
+        'Social Psychology',
+        'The Person',
+        'The Skilled Helper',
+        'On Becoming a Person'
+      ];
+      const hasAllBooks = requiredTitles.every((t) =>
+        BOOKS.some((b) => b.title.toLowerCase().includes(t.toLowerCase()))
+      );
+      assert('Reading library includes all 8 required psychology books', hasAllBooks);
+      assert('OpenStax Psychology 2e is marked free', BOOKS[0].id === 'book-psychology-2e' && BOOKS[0].isFree === true);
+
+      // 3. Progress calculations
+      const emptyState = P.createDefaultState();
+      const emptyStats = P.calculateOverallStats(emptyState, MODULES);
+      assert('Initial overall percentage is 0%', emptyStats.overallPercentage === 0 && emptyStats.totalTasks === 60);
+
+      // Complete 3 of 5 tasks in Week 1, plus an invalid task ID that should be ignored
+      const partialState = P.createDefaultState();
+      partialState.weeklyProgress['1'] = {
+        completedTasks: ['w1-t1', 'w1-t2', 'w1-t3', 'w1-t3', 'nonexistent-id'],
+        manualCompleted: false
+      };
+      const w1Stats = P.calculateWeekStats(MODULES[0], partialState.weeklyProgress['1']);
+      assert('Week 1 partial progress calculates 60% and deduplicates invalid IDs', w1Stats.completedCount === 3 && w1Stats.percentage === 60 && w1Stats.status === 'in_progress');
+
+      const partialOverall = P.calculateOverallStats(partialState, MODULES);
+      assert('Overall progress for 3/60 tasks is 5%', partialOverall.completedTasks === 3 && partialOverall.overallPercentage === 5);
+
+      // Complete all 5 tasks of Week 1
+      partialState.weeklyProgress['1'].completedTasks = MODULES[0].tasks.map((t) => t.id);
+      const w1DoneStats = P.calculateWeekStats(MODULES[0], partialState.weeklyProgress['1']);
+      assert('Completing all 5 tasks marks week completed (100%)', w1DoneStats.isCompleted === true && w1DoneStats.percentage === 100 && w1DoneStats.status === 'completed');
+
+      // 4. URL Validation (XSS & protocol safety)
+      assert('Accepts valid https URL', P.isValidHttpUrl('https://openstax.org/details/books/psychology-2e') === true);
+      assert('Rejects javascript: URL', P.isValidHttpUrl('javascript:alert(1)') === false);
+      assert('Rejects malformed URL', P.isValidHttpUrl('not a url') === false);
+
+      // 5. Import validation & normalization
+      const badImport = P.validateImportPayload({ foo: 'bar' }, MODULES);
+      assert('Rejects invalid JSON import payload', badImport.ok === false);
+
+      const goodImport = P.validateImportPayload({
+        profile: { displayName: '  Alex  ', currentWeek: 99 },
+        weeklyProgress: { '2': { completedTasks: ['w2-t1', 'fake'], manualCompleted: false } },
+        evidence: [
+          { weekNumber: 2, title: 'Notes', url: 'https://example.com/notes' },
+          { weekNumber: 2, title: 'Bad', url: 'javascript:evil()' }
+        ]
+      }, MODULES);
+      assert(
+        'Normalizes valid import: clamps week to 12, strips fake tasks & unsafe URLs',
+        goodImport.ok === true &&
+          goodImport.state.profile.displayName === 'Alex' &&
+          goodImport.state.profile.currentWeek === 12 &&
+          goodImport.state.weeklyProgress['2'].completedTasks.length === 1 &&
+          goodImport.state.evidence.length === 1
+      );
+
+      // Render report
+      const passedCount = results.filter((r) => r.passed).length;
+      const summaryEl = document.getElementById('test-summary');
+      summaryEl.innerHTML = `<strong class="${passedCount === results.length ? 'pass' : 'fail'}">${passedCount} / ${results.length} tests passed</strong>`;
+
+      const container = document.getElementById('test-results');
+      container.innerHTML = results
+        .map(
+          (r) => `
+          <div class="test-row">
+            <div>
+              <div>${r.name}</div>
+              ${r.detail ? `<small style="color: var(--text-muted);">${r.detail}</small>` : ''}
+            </div>
+            <span class="${r.passed ? 'pass' : 'fail'}">${r.passed ? 'PASS' : 'FAIL'}</span>
+          </div>
+        `
+        )
+        .join('');
+    })();
+  </script>
+</body>
+</html>

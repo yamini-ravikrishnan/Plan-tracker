@@ -1,0 +1,71 @@
+/* ==========================================================================
+   tokens.css — Design Tokens for Plan Tracker: Psychology SkillTrack
+   Warm, calm, psychology-inspired palette with accessible contrast & clean scale.
+   ========================================================================== */
+
+:root {
+  /* Core Brand & Surface Palette */
+  --bg-cream: #F7F7F0;           /* Warm cream main canvas */
+  --bg-cream-alt: #EFF1E7;       /* Subtle recessed background */
+  --surface-card: #FFFFFF;       /* Crisp white cards */
+  --surface-soft: #FCFDF9;       /* Off-white elevated/secondary panels */
+  --surface-hover: #F2F5EF;      /* Gentle sage-tinted hover */
+
+  /* Brand Accents */
+  --sage: #6F9584;               /* Sage green primary accent */
+  --sage-dark: #577A6A;          /* Hover/active sage */
+  --sage-light: #E6EFEA;         /* Soft sage tint for badges & pills */
+  --muted-blue: #527F78;         /* Muted blue-teal secondary accent */
+  --muted-blue-dark: #3F645E;    /* Deep muted blue */
+  --muted-blue-light: #E2ECEA;   /* Soft blue-teal tint */
+  --terracotta: #D99A68;         /* Soft terracotta warm highlight */
+  --terracotta-dark: #BF7E4B;    /* Darker terracotta for text/hover */
+  --terracotta-light: #FAF0E6;   /* Soft terracotta tint */
+
+  /* Typography & Ink */
+  --text-primary: #222B28;       /* Deep forest charcoal (easy on eyes) */
+  --text-secondary: #515F59;     /* Muted slate-sage for body copy */
+  --text-muted: #76847E;         /* Subtle labels and timestamps */
+  --text-inverse: #FFFFFF;
+
+  /* Borders & Dividers */
+  --border-subtle: #E3E7DD;
+  --border-strong: #CCD4C5;
+
+  /* Semantic Status */
+  --status-success: #4F8A6B;
+  --status-success-bg: #E6F3EC;
+  --status-warning: #C98245;
+  --status-warning-bg: #FDF3E8;
+  --status-danger: #B85C52;
+  --status-danger-bg: #FBECEB;
+  --status-info: #527F78;
+  --status-info-bg: #E5F0EE;
+
+  /* Typography Scale */
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Lora', Georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
+  --radius-pill: 9999px;
+
+  /* Elevation / Shadows */
+  --shadow-xs: 0 1px 2px rgba(34, 43, 40, 0.04);
+  --shadow-sm: 0 4px 12px rgba(34, 43, 40, 0.05);
+  --shadow-md: 0 10px 28px rgba(34, 43, 40, 0.07);
+  --shadow-lg: 0 18px 42px rgba(34, 43, 40, 0.11);
+
+  /* Layout Dimensions */
+  --sidebar-width: 272px;
+  --topbar-height: 68px;
+
+  /* Motion */
+  --ease-calm: cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-fast: 160ms var(--ease-calm);
+  --transition-base: 240ms var(--ease-calm);
+}
